@@ -185,10 +185,10 @@ while true {
 
 ```go
 //stack allocated
-var x string := string()
+var x string := string{}
 
 //heap allocated
-var x *string = &string() // requires package allocator to be defined
+var x *string = &string{5 /*number of elements in buffer*/} // requires package allocator to be defined
 ```
 
 # Allocators
@@ -200,7 +200,7 @@ import func malloc(size int) *interface {}
 import func free(ptr *interface) {}
 
 func &[T](size int) *T {
-    return malloc(size)
+    return malloc(sizeof T * size)
 }
 
 func defer[T](ptr *T) {
@@ -213,7 +213,8 @@ Using allocators
 ```go
 select myallocator package main
 select myallocator func someFunction()
-select myallocator struct A 
+select myallocator struct A
+select myallocator default //default allocator
 
 import {
     "myproject/myallocator"
@@ -260,4 +261,5 @@ x := &string{}
 *x = "Hello World!"
 
 defer x
+free x
 ```

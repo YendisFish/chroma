@@ -6,7 +6,7 @@ import (
 	"chroma/parser"
 	"os"
 
-	"github.com/k0kubun/pp"
+	"github.com/k0kubun/pp/v3"
 )
 
 func main() {

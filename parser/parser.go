@@ -51,6 +51,11 @@ func (p *Parser) Enter(n Node) {
 	p.node = n
 }
 
+func (p *Parser) Append(n Node) {
+	n.CreateParent(p.node)
+	p.node.Append(n)
+}
+
 func (p *Parser) Peek() lexer.Token {
 	return p.Toks[p.Index+1]
 }
@@ -101,5 +106,8 @@ func (p *Parser) ParseWord() {
 	case "func":
 		var fnc *Function = p.ParseFunction()
 		p.Enter(fnc)
+	case "var":
+		var v *Variable = p.ParseVariable()
+		p.Append(v)
 	}
 }

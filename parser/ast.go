@@ -24,8 +24,24 @@ func (a *RootNode) Append(node Node)       { a.children = append(a.children, nod
 func (a *RootNode) CreateParent(node Node) { a.parent = node }
 
 type TypeInfo struct {
-	Name     string
-	Generics []string
-	Pointers int
-	Arrays   int
+	Name     *string
+	Generics []TypeInfo
+	Pointers []Ptr
 }
+
+func EmptyType() TypeInfo {
+	return TypeInfo{nil, nil, nil}
+}
+
+type Ptr struct {
+	Type  PointerType
+	Index *int64
+}
+
+type PointerType int
+
+const (
+	Array PointerType = iota
+	Pointer
+	Slice
+)

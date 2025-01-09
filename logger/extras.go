@@ -49,7 +49,7 @@ func SLogLine(filename string, line int) string {
 }
 
 func BLogLine(filename string, line int) string {
-	ret := "\n"
+	ret := ""
 
 	content, err := os.ReadFile(filename)
 	if err != nil {

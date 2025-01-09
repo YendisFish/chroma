@@ -2,6 +2,10 @@ package parser
 
 import (
 	"chroma/lexer"
+	"chroma/logger"
+	"strconv"
+
+	"github.com/k0kubun/pp"
 )
 
 func (p *Parser) ParseFunction() *Function {
@@ -42,6 +46,13 @@ func (p *Parser) ParseFunctionArgs() []Variable {
 		case lexer.RParen:
 			reading = false
 			p.Advance()
+		default:
+			logger.Exit("(Parsing) Failed to parse function arguments (Unrecognized Symbol)",
+				[]string{"Line", strconv.Itoa(p.Line)},
+				[]string{"Col", strconv.Itoa(p.Column)},
+				[]string{"Symbol", p.Current().Raw},
+				[]string{"Ast", "\n" + pp.Sprintln(ret) + "\n"},
+				[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line) + "\n"})
 		}
 
 		if !reading {
