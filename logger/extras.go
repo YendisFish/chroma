@@ -11,7 +11,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func SLogLine(filename string, line int) string {
+func SLogLine(filename string, line int, e string) string {
 	ret := "\n"
 
 	content, err := os.ReadFile(filename)
@@ -33,7 +33,7 @@ func SLogLine(filename string, line int) string {
 	}
 
 	//fmt.Println(lines[line-1])
-	ret = ret + color.New(color.FgRed, color.Bold).Sprint("E") + color.New(color.FgCyan).Sprint(line) + " " + lines[line-1] + ""
+	ret = ret + color.New(color.FgRed, color.Bold).Sprint("E") + color.New(color.FgCyan).Sprint(line) + " " + addSuffix(lines[line-1], "   "+color.New(color.FgRed, color.Bold).Sprint(e))
 
 	if line+5 < len(lines) {
 		for i := line; i < line+5; i++ {
@@ -70,7 +70,7 @@ func BLogLine(filename string, line int) string {
 	}
 
 	//fmt.Println(lines[line-1])
-	ret = ret + color.New(color.FgRed, color.Bold).Sprint("B") + color.New(color.FgCyan).Sprint(line) + " " + lines[line-1] + ""
+	ret = ret + color.New(color.FgRed, color.Bold).Sprint("B") + color.New(color.FgCyan).Sprint(line) + " " + lines[line-1]
 
 	if line+5 < len(lines) {
 		for i := line; i < line+5; i++ {
@@ -91,6 +91,7 @@ func syntaxHighlight(raw []string) []string {
 
 	ret := []string{}
 	for _, v := range raw {
+		v = removeCarriageReturn(v)
 		lexer := lexers.Get("go")
 		iterator, err := lexer.Tokenise(nil, v)
 		if err != nil {
@@ -103,5 +104,30 @@ func syntaxHighlight(raw []string) []string {
 		ret = append(ret, buf.String())
 	}
 
+	return ret
+}
+
+func removeCarriageReturn(str string) string {
+	ret := ""
+	for _, v := range str {
+		if v != '\r' {
+			ret += string(v)
+		}
+	}
+
+	ret += "\n"
+	return ret
+}
+
+func addSuffix(str string, suff string) string {
+	ret := ""
+	for _, v := range str {
+		if v != '\n' {
+			ret += string(v)
+		}
+	}
+
+	ret += suff
+	ret += "\n"
 	return ret
 }

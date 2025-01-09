@@ -14,5 +14,11 @@ func (p *Parser) ParseVariable() *Variable {
 		tp = p.ReadType()
 	}
 
-	return &Variable{nil, []Node{}, name, tp}
+	var expr Expression
+	if p.Current().Type == lexer.Equals {
+		p.Advance()
+		p.ParseExpression(&expr)
+	}
+
+	return &Variable{nil, []Node{}, name, tp, p.Line, p.Column, p.Filename, expr}
 }

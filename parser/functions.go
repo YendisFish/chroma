@@ -21,7 +21,7 @@ func (p *Parser) ParseFunction() *Function {
 		tp = TypeInfo{}
 	}
 
-	return &Function{nil, []Node{}, name, tp, vars}
+	return &Function{nil, []Node{}, p.Line, p.Column, p.Filename, name, tp, vars}
 }
 
 func (p *Parser) ParseFunctionArgs() []Variable {
@@ -40,7 +40,7 @@ func (p *Parser) ParseFunctionArgs() []Variable {
 			p.Advance()
 			tp := p.ReadType()
 
-			ret = append(ret, Variable{nil, []Node{}, name, tp})
+			ret = append(ret, Variable{nil, []Node{}, name, tp, p.Line, p.Column, p.Filename, nil /*THIS CAN NOT BE NIL FOREVER*/})
 		case lexer.Comma:
 			p.Advance()
 		case lexer.RParen:
@@ -52,7 +52,7 @@ func (p *Parser) ParseFunctionArgs() []Variable {
 				[]string{"Col", strconv.Itoa(p.Column)},
 				[]string{"Symbol", p.Current().Raw},
 				[]string{"Ast", "\n" + pp.Sprintln(ret) + "\n"},
-				[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line) + "\n"})
+				[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, "(Parsing) Failed to parse function arguments (Unrecognized Symbol)") + "\n"})
 		}
 
 		if !reading {

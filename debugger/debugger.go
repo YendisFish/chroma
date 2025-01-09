@@ -12,7 +12,7 @@ import (
 
 //YES IK THIS IS A HORRIBLE WAY TO DO A DEBUGGER!!!!!
 
-var Lines = []int{5}
+var Lines = []int{}
 
 func Break(ast any, flename string, line int) {
 	c := color.New(color.FgRed, color.Bold)

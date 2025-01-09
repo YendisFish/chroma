@@ -27,7 +27,7 @@ type Parser struct {
 }
 
 func Create(toks []lexer.Token, file string) *Parser {
-	ast := Ast{&RootNode{nil, []Node{}}}
+	ast := Ast{&RootNode{nil, []Node{}, 0, 0, file}}
 	return &Parser{toks, 0, 1, 1, file, ast, ast.Root}
 }
 
@@ -66,7 +66,7 @@ func (p *Parser) Exit() {
 			[]string{"Line", strconv.Itoa(p.Line)},
 			[]string{"Col", strconv.Itoa(p.Column)},
 			[]string{"Ast", "\n" + pp.Sprintln(p.node) + "\n"},
-			[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line) + "\n"})
+			[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, "(Parsing) Compiler tried to escape root node of AST") + "\n"})
 	}
 
 	p.node = p.node.Parent()
@@ -82,17 +82,15 @@ func (p *Parser) Parse() {
 			p.ParseWord()
 		case lexer.LBrace:
 			p.Exit()
-
 		case lexer.Eof:
 			reading = false
-
 		default:
 			logger.Exit("(Parsing) Unrecognized token",
 				[]string{"Line", strconv.Itoa(p.Line)},
 				[]string{"Col", strconv.Itoa(p.Column)},
 				[]string{"Token", p.Current().Raw},
 				[]string{"Ast", "\n" + pp.Sprintln(p.node) + "\n"},
-				[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line) + "\n"})
+				[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, "(Parsing) Unrecognized token") + "\n"})
 		}
 
 		if !reading {
