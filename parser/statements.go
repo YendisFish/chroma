@@ -67,7 +67,7 @@ func (p *Parser) ParseForRange() *For {
 		switch tp := expr.(type) {
 		case *FuncRef:
 			tp.IndexRef = []Expression{
-				&VarRef{
+				&FuncRef{
 					nil,
 					nil,
 					p.Line,
