@@ -51,3 +51,39 @@ func (a *BinOp) CreateParent(node Node) { a.parent = node }
 func (a *BinOp) Line() int              { return a.line }
 func (a *BinOp) Filename() string       { return a.filename }
 func (a *BinOp) Col() int               { return a.col }
+
+type VarRef struct {
+	parent   Node
+	children []Node
+	line     int
+	col      int
+	filename string
+	Name     string
+	IndexRef []Expression
+}
+
+func (a *VarRef) Children() []Node       { return a.children }
+func (a *VarRef) Parent() Node           { return a.parent }
+func (a *VarRef) Append(node Node)       { a.children = append(a.children, node) }
+func (a *VarRef) CreateParent(node Node) { a.parent = node }
+func (a *VarRef) Line() int              { return a.line }
+func (a *VarRef) Filename() string       { return a.filename }
+func (a *VarRef) Col() int               { return a.col }
+
+type FuncRef struct {
+	parent   Node
+	children []Node
+	line     int
+	col      int
+	filename string
+	Name     string
+	IndexRef []Expression
+}
+
+func (a *FuncRef) Children() []Node       { return a.children }
+func (a *FuncRef) Parent() Node           { return a.parent }
+func (a *FuncRef) Append(node Node)       { a.children = append(a.children, node) }
+func (a *FuncRef) CreateParent(node Node) { a.parent = node }
+func (a *FuncRef) Line() int              { return a.line }
+func (a *FuncRef) Filename() string       { return a.filename }
+func (a *FuncRef) Col() int               { return a.col }

@@ -45,6 +45,18 @@ func (p *Parser) Advance() {
 	}
 }
 
+func (p *Parser) AdvanceBy(num int) {
+	p.Index = p.Index + num
+	p.Line = p.Toks[p.Index].Line
+	p.Column = p.Toks[p.Index].Col
+
+	for _, v := range debugger.Lines {
+		if p.Line == v {
+			debugger.Break(p.node, p.Filename, p.Line)
+		}
+	}
+}
+
 // sets the current node to the given node, basically entering a new scope
 func (p *Parser) Enter(n Node) {
 	n.CreateParent(p.node)
@@ -86,7 +98,7 @@ func (p *Parser) Parse() {
 		switch p.Current().Type {
 		case lexer.Word:
 			p.ParseWord()
-		case lexer.LBrace:
+		case lexer.RBrace:
 			p.Exit()
 			p.Advance()
 		case lexer.Eof:
@@ -125,13 +137,29 @@ func (p *Parser) ParseWord() {
 		p.Enter(wstat)
 		p.Advance()
 	case "package":
-		p.Advance()
-		pkg := &Package{nil, nil, p.Line, p.Column, p.Filename, p.Current().Raw}
+		var pkg *Package = p.ParsePackage()
 		p.Enter(pkg)
 		p.Advance()
+	case "import":
+		var imp *Import = p.ParseImport()
+		p.Enter(imp)
+		p.Advance()
+	case "for":
+		p.Advance()
+
+		if p.Peek().Type == lexer.Comma {
+			//handle range for loop
+			var fr *For = p.ParseForRange()
+			p.Enter(fr)
+			p.Advance()
+		} else {
+			//handle traditional for loop
+		}
 	default:
 		var expr Expression
 		p.ParseExpression(&expr)
+
+		p.Append(expr)
 
 		p.Advance()
 	}

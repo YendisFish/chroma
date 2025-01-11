@@ -31,7 +31,7 @@ struct string {
         return string{unsafeChars: chars, length: len}
     }
 
-    func [](index int) error[rune] {
+    func [](index int) rune {
         if length > index && index >= 0 {
             return index, unsafeChars[index]
         }
@@ -39,10 +39,9 @@ struct string {
         error "Index out of bounds!"
     }
 
-    func [](index int, value rune) error {
+    func [](index int, value rune) {
         if length > index && index >= 0 {
             unsafeChars[index] = value
-            error nil
         }
 
         error "Index out of bounds!"
@@ -143,28 +142,18 @@ switch type x {
 ### For
 
 ```go
-//safe iteration
-x := []int{1, 2, 3, 4, 5, 6, 7}
-for i, error e range x {
-    if e.err != nil {
-        //handle e's error
-    }
-
-    io.println(e.value)
-}
-
-//unsafe iteration
 for i, num range x {
     io.println(num)
 }
 
-//I do not need I
-for _, num range x {
+//I do not need num
+for i, _ range x {
     io.println(num)
 }
 
-//traditional for loops
+//range for loops always need 'i' to be defined since they use it under the hood
 
+//traditional for loops
 for i := 0; i < x.length; i++ {
     err := error x[i]
     io.println(x[i])

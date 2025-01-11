@@ -71,3 +71,22 @@ func (a *Import) CreateParent(node Node) { a.parent = node }
 func (a *Import) Line() int              { return a.line }
 func (a *Import) Filename() string       { return a.filename }
 func (a *Import) Col() int               { return a.col }
+
+type For struct {
+	parent    Node
+	children  []Node
+	line      int
+	col       int
+	filename  string
+	Var       *Variable
+	Cond      Expression
+	Operation Expression
+}
+
+func (a *For) Children() []Node       { return a.children }
+func (a *For) Parent() Node           { return a.parent }
+func (a *For) Append(node Node)       { a.children = append(a.children, node) }
+func (a *For) CreateParent(node Node) { a.parent = node }
+func (a *For) Line() int              { return a.line }
+func (a *For) Filename() string       { return a.filename }
+func (a *For) Col() int               { return a.col }

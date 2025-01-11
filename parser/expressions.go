@@ -9,20 +9,32 @@ import (
 	"github.com/k0kubun/pp"
 )
 
+// parses an expression
 func (p *Parser) ParseExpression(expr *Expression) {
 	for reading := true; reading; {
 		switch tok := p.Current(); tok.Type {
 		case lexer.Word:
-			if val, ok := determineLiteralType(p.Current()); ok {
-				*expr = &Literal{nil, nil, p.Line, p.Column, p.Filename, p.Current().Raw, val}
-				p.Advance()
+			switch tok.Raw {
+			//ideally there will be cases for from, error, and other stuff as well
+			default:
+				if val, ok := determineLiteralType(p.Current()); ok {
+					*expr = &Literal{nil, nil, p.Line, p.Column, p.Filename, p.Current().Raw, val}
+					p.Advance()
+				} else if val, ok := p.determineFuncRef(); ok {
+					*expr = val
+					p.Advance()
+				} else {
+					val := p.parseVarRef()
+					*expr = val
+					p.Advance()
+				}
 			}
 
 			if p.Current().Line != tok.Line {
 				reading = false
-			} else {
-				p.Advance()
 			}
+
+			//p.Advance()
 		case lexer.Add, lexer.Subtract, lexer.Star, lexer.BSlash:
 			//check for boolop
 			//parse binop
@@ -61,6 +73,7 @@ func (p *Parser) ParseExpression(expr *Expression) {
 	}
 }
 
+// parse, compress, and determine a literal
 func determineLiteralType(tok lexer.Token) (LiteralType, bool) {
 	if strings.HasPrefix(tok.Raw, "0x") {
 		return LByte, true
@@ -80,4 +93,20 @@ func determineLiteralType(tok lexer.Token) (LiteralType, bool) {
 	}
 
 	return -1, false
+}
+
+// determine if reading a func and parse if reading
+func (p *Parser) determineFuncRef() (*FuncRef, bool) {
+	if pkt := p.Peek().Type; pkt != lexer.LBrack || pkt != lexer.LParen {
+		return nil, false
+	}
+
+	nm := p.Current().Raw
+	return &FuncRef{nil, nil, p.Line, p.Column, p.Filename, nm, nil}, true
+}
+
+// parse a variable
+func (p *Parser) parseVarRef() *VarRef {
+	nm := p.Current().Raw
+	return &VarRef{nil, nil, p.Line, p.Column, p.Filename, nm, nil}
 }
