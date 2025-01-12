@@ -22,7 +22,6 @@ func main() {
 	p.Parse()
 
 	pp.Println(p.Ast)
-
 	/*for _, v := range toks {
 		pp.Println(v)
 	}*/

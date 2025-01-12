@@ -6,7 +6,17 @@ func (p *Parser) ParseIf() *If {
 	var cond Expression
 	p.ParseExpression(&cond)
 
-	return &If{nil, []Node{}, p.Line, p.Column, p.Filename, cond}
+	return &If{nil, []Node{}, p.Line, p.Column, p.Filename, cond, nil}
+}
+
+func (p *Parser) ParseElse() {
+	p.Advance()
+
+	switch tp := p.node.(type) {
+	case *If:
+		tp.ElseBlock = &Else{tp.Parent(), []Node{}, p.Line, p.Column, p.Filename}
+		p.Enter(tp.ElseBlock)
+	}
 }
 
 func (p *Parser) ParseWhile() *While {

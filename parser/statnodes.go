@@ -11,6 +11,7 @@ type If struct {
 	col       int
 	filename  string
 	Condition Expression
+	ElseBlock *Else
 }
 
 func (a *If) Children() []Node       { return a.children }
@@ -20,6 +21,22 @@ func (a *If) CreateParent(node Node) { a.parent = node }
 func (a *If) Line() int              { return a.line }
 func (a *If) Filename() string       { return a.filename }
 func (a *If) Col() int               { return a.col }
+
+type Else struct {
+	parent   Node
+	children []Node
+	line     int
+	col      int
+	filename string
+}
+
+func (a *Else) Children() []Node       { return a.children }
+func (a *Else) Parent() Node           { return a.parent }
+func (a *Else) Append(node Node)       { a.children = append(a.children, node) }
+func (a *Else) CreateParent(node Node) { a.parent = node }
+func (a *Else) Line() int              { return a.line }
+func (a *Else) Filename() string       { return a.filename }
+func (a *Else) Col() int               { return a.col }
 
 type While struct {
 	parent    Node

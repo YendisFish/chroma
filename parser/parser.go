@@ -99,8 +99,19 @@ func (p *Parser) Parse() {
 		case lexer.Word:
 			p.ParseWord()
 		case lexer.RBrace:
-			p.Exit()
-			p.Advance()
+			switch p.node.(type) {
+			case *If:
+				if _, ok := p.node.Parent().(*If); !ok {
+					p.Advance()
+				}
+
+				p.Exit()
+
+				break
+			default:
+				p.Exit()
+				p.Advance()
+			}
 		case lexer.Eof:
 			reading = false
 		default:
@@ -132,6 +143,9 @@ func (p *Parser) ParseWord() {
 		var ifstat *If = p.ParseIf()
 		p.Enter(ifstat)
 		p.Advance()
+	case "else":
+		//parse else or something ig
+		p.ParseElse() // this enters the else block!!!!
 	case "while":
 		var wstat *While = p.ParseWhile()
 		p.Enter(wstat)
