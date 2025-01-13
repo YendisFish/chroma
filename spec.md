@@ -27,28 +27,24 @@ struct string {
     unsafeChars *rune
     length int
 
-    func struct(chars *rune, len int) {
-        return string{unsafeChars: chars, length: len}
+    func struct *rune {
+        return unsafeChars
     }
 
     func [](index int) rune {
-        if length > index && index >= 0 {
-            return index, unsafeChars[index]
+        if length > indexc && index >= 0 {
+            return unsafeChars[index]    
         }
 
-        error "Index out of bounds!"
+        panic("Index out of bounds!")
     }
 
     func [](index int, value rune) {
-        if length > index && index >= 0 {
-            unsafeChars[index] = value
+        if length > indexc && index >= 0 {
+            unsafeChars[index] = rune    
         }
 
-        error "Index out of bounds!"
-    }
-
-    func struct() *rune {
-        return unsafeChars
+        panic("Index out of bounds!")
     }
 }
 ```
@@ -57,13 +53,45 @@ struct string {
 
 ```go
 struct A {
-    Str string
+    prop string
 }
 
-struct B A;
+struct B A
 
-func (struct B) MyFunction() string {
-    return struct.Str
+func (B) PrintProp() {
+    io.println(struct.prop, struct.prop.length)
+}
+```
+
+### Interfaces
+
+```go
+interface IList[T] {
+    elements *T
+    length int
+    capacity int
+
+    func (*IList) Add()
+    func (*IList) Remove()
+}
+
+struct List[T] {
+    elements *T
+    length int
+    capacity int
+}
+
+func (List) Add() {
+
+}
+
+func (List) Remove() {
+
+}
+
+// List implements IList!!!
+func main() {
+    var lst IList[int] = &List{} //interfaces always take pointers as they are reference types!
 }
 ```
 
@@ -81,7 +109,7 @@ union MyUnion {
 You can implement functions for union types as well!
 
 ```go
-func (a *Something) UnionFunc() { }
+func (Something) UnionFunc() { }
 ```
 
 Union types MUST be by reference!
@@ -93,7 +121,7 @@ struct A {
     Str string
 }
 
-func (struct *A) MyFunction() {
+func (*A) MyFunction() {
     io.println(first := struct.Str, first.length)
 }
 
@@ -231,13 +259,13 @@ import {
 
 ```go
 struct A {
-    func struct() B {
+    func struct B {
         return (B)struct
     }
 }
 
 struct B {
-    func struct() A {
+    func struct A {
         return (A)struct
     }
 }
@@ -251,4 +279,30 @@ x := &string{}
 
 defer x
 free x
+```
+
+# From operator
+
+The from operator will copy by reference *into* a new type
+
+```go
+a := &string{5}
+var b [5]string = from a // the reference to a is still stored in b, we have just copied the reference into our array
+var c []string = from b[5] // we can also copy by reference into a slice (however this functionality is more shorthand than anything)
+```
+
+# Stack Buffers
+
+```go
+func Foo() *byte {
+    fixed buff [5]byte // we have inlined a 5 byte buffer onto the stack
+    //these buffers cannot be returned, and are not allowed to escape their enclosing scope
+    //well... they are... but you need to be explicit to do so, for instance:
+    return &buff[0] //this will cause UB
+}
+
+//we can also inline buffers in structs
+struct A {
+    fixed buff []byte
+}
 ```
