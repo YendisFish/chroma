@@ -14,6 +14,15 @@ func (p *Parser) ParseExpression(expr *Expression) {
 	for reading := true; reading; {
 		switch tok := p.Current(); tok.Type {
 		case lexer.Word:
+			if p.Peek().Type == lexer.Colon {
+				vr := p.ParseShortVar()
+				expr = nil
+				reading = false
+
+				p.Append(vr)
+				break
+			}
+
 			switch tok.Raw {
 			//ideally there will be cases for from, error, and other stuff as well
 			default:
@@ -39,16 +48,16 @@ func (p *Parser) ParseExpression(expr *Expression) {
 			//check for boolop
 			//parse binop
 
-			bop := &BinOp{nil, nil, p.Line, p.Column, p.Filename, *expr, nil, p.Current().Raw}
+			binop := &BinOp{nil, nil, p.Line, p.Column, p.Filename, *expr, nil, p.Current().Raw}
 			p.Advance()
 
-			var rght Expression
-			p.ParseExpression(&rght)
-			bop.Right = rght
+			var right Expression
+			p.ParseExpression(&right)
+			binop.Right = right
 
 			p.Advance()
 
-			*expr = bop
+			*expr = binop
 		case lexer.LParen:
 			p.Advance()
 		case lexer.LBrace, lexer.RParen:
@@ -109,4 +118,14 @@ func (p *Parser) determineFuncRef() (*FuncRef, bool) {
 func (p *Parser) parseVarRef() *VarRef {
 	nm := p.Current().Raw
 	return &VarRef{nil, nil, p.Line, p.Column, p.Filename, nm, nil}
+}
+
+func (p *Parser) ParseShortVar() *Variable {
+	nm := p.Current().Raw
+
+	p.AdvanceBy(3)
+	var expr Expression
+	p.ParseExpression(&expr)
+
+	return &Variable{p.node, []Node{}, nm, TypeInfo{nil, nil, nil}, p.Line, p.Column, p.Filename, expr}
 }

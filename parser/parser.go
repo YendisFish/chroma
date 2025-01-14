@@ -14,6 +14,7 @@ type ParserState int
 const (
 	Func ParserState = iota
 	Strct
+	Global
 )
 
 type Parser struct {
@@ -24,11 +25,12 @@ type Parser struct {
 	Filename string
 	Ast      Ast
 	node     Node
+	State    ParserState
 }
 
 func Create(toks []lexer.Token, file string) *Parser {
 	ast := Ast{&RootNode{nil, []Node{}, 0, 0, file}}
-	return &Parser{toks, 0, 1, 1, file, ast, ast.Root}
+	return &Parser{toks, 0, 1, 1, file, ast, ast.Root, Global}
 }
 
 func (p *Parser) CurrentNode() Node { return p.node }
@@ -169,11 +171,18 @@ func (p *Parser) ParseWord() {
 		} else {
 			//handle traditional for loop
 		}
+	case "type":
+		//parse type
+		var tpdef *TypeDef = p.ParseTypeDef()
+		p.Enter(tpdef)
+		p.Advance()
 	default:
 		var expr Expression
 		p.ParseExpression(&expr)
 
-		p.Append(expr)
+		if expr != nil {
+			p.Append(expr)
+		}
 
 		p.Advance()
 	}

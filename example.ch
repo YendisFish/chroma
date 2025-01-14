@@ -3,11 +3,13 @@ package main
 import io
 
 func main(args []string) {
-    if true {
+    a := 5
+}
 
-    } else if false {
-        if true {
+type A struct {
 
-        }
-    }
+}
+
+func (a *A) someFunc() {
+
 }

@@ -10,9 +10,31 @@ import (
 
 func (p *Parser) ParseFunction() *Function {
 	p.Advance()
+
+	var argOne *Variable = nil
+	ifunc := false
+	if p.Current().Type == lexer.LParen {
+		p.Advance()
+
+		instanceName := p.Current().Raw
+		p.Advance()
+
+		instanceTp := p.ReadType()
+
+		argOne = &Variable{nil, []Node{}, instanceName, instanceTp, p.Line, p.Column, p.Filename, nil}
+		ifunc = true
+
+		p.Advance()
+	}
+
 	name := p.Current().Raw
 	p.Advance()
-	vars := p.ParseFunctionArgs()
+	var vars []Variable
+	vars = p.ParseFunctionArgs()
+
+	if ifunc {
+		vars = append([]Variable{*argOne}, vars...)
+	}
 
 	var tp TypeInfo
 	if p.Current().Type != lexer.LBrace {
@@ -21,7 +43,7 @@ func (p *Parser) ParseFunction() *Function {
 		tp = TypeInfo{}
 	}
 
-	return &Function{nil, []Node{}, p.Line, p.Column, p.Filename, name, tp, vars}
+	return &Function{nil, []Node{}, p.Line, p.Column, p.Filename, name, tp, vars, ifunc}
 }
 
 func (p *Parser) ParseFunctionArgs() []Variable {
@@ -32,10 +54,6 @@ func (p *Parser) ParseFunctionArgs() []Variable {
 	for reading := true; reading; {
 		switch tok := p.Current(); tok.Type {
 		case lexer.Word:
-			if p.Peek().Type == lexer.Colon {
-				//handle var declaration
-			}
-
 			name := p.Current().Raw
 			p.Advance()
 			tp := p.ReadType()

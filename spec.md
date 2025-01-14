@@ -23,75 +23,75 @@ foo := "Foo"
 # Types
 
 ```go
-struct string {
+type string struct {
     unsafeChars *rune
     length int
+}
 
-    func struct *rune {
-        return unsafeChars
+func (s *string) struct *rune {
+    return s.unsafeChars
+}
+
+func (s *string) [](index int) rune {
+    if s.length > index && index >= 0 {
+        return s.unsafeChars[index]
     }
 
-    func [](index int) rune {
-        if length > indexc && index >= 0 {
-            return unsafeChars[index]    
-        }
+    panic("Index out of bounds!")
+}
 
-        panic("Index out of bounds!")
+func (s *string) [](index int, value rune) {
+    if s.length > index && index >= 0 {
+        s.unsafeChars[index] = value
     }
 
-    func [](index int, value rune) {
-        if length > indexc && index >= 0 {
-            unsafeChars[index] = rune    
-        }
-
-        panic("Index out of bounds!")
-    }
+    panic("Index out of bounds!")
 }
 ```
 
 ### Inheritance
 
 ```go
-struct A {
+type A struct {
     prop string
 }
 
-struct B A
+type B A
 
-func (B) PrintProp() {
-    io.println(struct.prop, struct.prop.length)
+func (b *B) PrintProp() {
+    io.println(b.prop, b.prop.length)
 }
 ```
 
 ### Interfaces
 
 ```go
-interface IList[T] {
+type IList[T] interface {
     elements *T
     length int
     capacity int
 
-    func (*IList) Add()
-    func (*IList) Remove()
+    Add()
+    Remove()
 }
 
-struct List[T] {
+type List[T] struct {
     elements *T
     length int
     capacity int
 }
 
-func (List) Add() {
+func (l *List) Add() {
 
 }
 
-func (List) Remove() {
+func (l *List) Remove() {
 
 }
 
 // List implements IList!!!
 func main() {
-    var lst IList[int] = &List{} //interfaces always take pointers as they are reference types!
+    var lst *IList[int] = &List[int]{} //interfaces always take pointers as they are reference types!
 }
 ```
 
@@ -101,7 +101,7 @@ func main() {
 union MyUnion {
     union Foo(a string)
     union Bar {
-        union Something
+        union Somethingcharacters
     }
 }
 ```
@@ -109,7 +109,7 @@ union MyUnion {
 You can implement functions for union types as well!
 
 ```go
-func (Something) UnionFunc() { }
+func (a *Something) UnionFunc() { }
 ```
 
 Union types MUST be by reference!
@@ -117,12 +117,12 @@ Union types MUST be by reference!
 ### Implementing Instance Functions
 
 ```go
-struct A {
+type A struct {
     Str string
 }
 
-func (*A) MyFunction() {
-    io.println(first := struct.Str, first.length)
+func (a *A) MyFunction() {
+    io.println(first := a.Str, first.length)
 }
 
 ```
@@ -220,7 +220,7 @@ func &[T](size int) *T {
     return malloc(sizeof T * size)
 }
 
-func defer[T](ptr *T) {
+func delete[T](ptr *T) {
     free(ptr)
 }
 ```
@@ -241,7 +241,7 @@ func someFunction() {
 
 }
 
-struct A {
+type A struct {
 
 }
 ```
@@ -258,16 +258,18 @@ import {
 # Conversion Operators
 
 ```go
-struct A {
-    func struct B {
-        return (B)struct
-    }
+type A struct {
 }
 
-struct B {
-    func struct A {
-        return (A)struct
-    }
+func (a *A) struct B {
+    return (B)a
+}
+
+type B struct {
+}
+
+func (b *B) struct A {
+    return (A)b
 }
 ```
 
@@ -278,7 +280,7 @@ x := &string{}
 *x = "Hello World!"
 
 defer x
-free x
+delete x
 ```
 
 # From operator
@@ -295,14 +297,14 @@ var c []string = from b[5] // we can also copy by reference into a slice (howeve
 
 ```go
 func Foo() *byte {
-    fixed buff [5]byte // we have inlined a 5 byte buffer onto the stack
+    const buff [5]byte // we have inlined a 5 byte buffer onto the stack
     //these buffers cannot be returned, and are not allowed to escape their enclosing scope
     //well... they are... but you need to be explicit to do so, for instance:
     return &buff[0] //this will cause UB
 }
 
 //we can also inline buffers in structs
-struct A {
-    fixed buff []byte
+type A struct {
+    const buff [5]byte
 }
 ```
