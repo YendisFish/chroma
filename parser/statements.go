@@ -32,11 +32,20 @@ func (p *Parser) ParsePackage() *Package {
 	p.Advance()
 	nm := p.Current().Raw
 
+	var ptp PkgType = PkgNormal
 	if p.Peek().Raw == "type" {
 		// handle allocators and such
+		p.AdvanceBy(2)
+
+		switch p.Current().Raw {
+		case "allocator":
+			ptp = PkgAllocator
+		default:
+			p.Panic("Unrecognized package type", "Package")
+		}
 	}
 
-	pkg := &Package{nil, nil, p.Line, p.Column, p.Filename, nm}
+	pkg := &Package{nil, nil, p.Line, p.Column, p.Filename, nm, ptp}
 	return pkg
 }
 

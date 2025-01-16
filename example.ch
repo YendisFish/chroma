@@ -10,6 +10,14 @@ type A struct {
 
 }
 
+type B A {
+
+}
+
+func (a *A) []() {
+
+}
+
 func (a *A) someFunc() {
 
 }

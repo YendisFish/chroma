@@ -215,8 +215,8 @@ package myallocator type allocator
 
 import func malloc(size int) *interface {}
 import func free(ptr *interface) {}
-
-func &[T](size int) *T {
+ 
+func alloc[T](size int) *T {
     return malloc(sizeof T * size)
 }
 
@@ -306,5 +306,15 @@ func Foo() *byte {
 //we can also inline buffers in structs
 type A struct {
     const buff [5]byte
+}
+```
+
+# Immutable instanciation
+
+This creates an implicit setter that ensures that the variable is immutable for the given scope
+
+```go
+func main() {
+    a := const "Hello, World!"
 }
 ```

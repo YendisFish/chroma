@@ -11,7 +11,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func SLogLine(filename string, line int, e string) string {
+func SLogLine(filename string, line int, col int, e string) string {
 	ret := "\n"
 
 	content, err := os.ReadFile(filename)
@@ -33,7 +33,8 @@ func SLogLine(filename string, line int, e string) string {
 	}
 
 	//fmt.Println(lines[line-1])
-	ret = ret + color.New(color.FgRed, color.Bold).Sprint("E") + color.New(color.FgCyan).Sprint(line) + " " + addSuffix(lines[line-1], "   "+color.New(color.FgRed, color.Bold).Sprint(e))
+	ln := color.New(color.FgRed, color.Bold).Sprint("E") + color.New(color.FgCyan).Sprint(line) + " " + addSuffix(lines[line-1], "   "+color.New(color.FgRed, color.Bold).Sprint(e))
+	ret = ret + ln
 
 	if line+5 < len(lines) {
 		for i := line; i < line+5; i++ {

@@ -50,13 +50,14 @@ func (a *Variable) Col() int               { return a.col }
 //type
 
 type TypeDef struct {
-	parent   Node
-	children []Node
-	line     int
-	col      int
-	filename string
-	Name     string
-	Type     TypeType
+	parent     Node
+	children   []Node
+	line       int
+	col        int
+	filename   string
+	Name       string
+	Type       TypeType
+	BaseStruct *string
 }
 
 type TypeType int

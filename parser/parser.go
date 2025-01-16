@@ -26,14 +26,30 @@ type Parser struct {
 	Ast      Ast
 	node     Node
 	State    ParserState
+
+	Debug bool
 }
 
-func Create(toks []lexer.Token, file string) *Parser {
+func Create(toks []lexer.Token, file string, dbg bool) *Parser {
 	ast := Ast{&RootNode{nil, []Node{}, 0, 0, file}}
-	return &Parser{toks, 0, 1, 1, file, ast, ast.Root, Global}
+	return &Parser{toks, 0, 1, 1, file, ast, ast.Root, Global, dbg}
 }
 
 func (p *Parser) CurrentNode() Node { return p.node }
+
+func (p *Parser) Panic(message string, location string) {
+	msg := "(Parser)(" + location + ") " + message
+	if p.Debug {
+		logger.Exit(msg,
+			[]string{"Line", strconv.Itoa(p.Line)},
+			[]string{"Col", strconv.Itoa(p.Column)},
+			[]string{"Ast", "\n" + pp.Sprintln(p.node) + "\n"},
+			[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, p.Column, msg) + "\n"})
+	}
+
+	logger.Exit(msg,
+		[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, p.Column, msg) + "\n"})
+}
 
 func (p *Parser) Advance() {
 	p.Index++
@@ -80,11 +96,7 @@ func (p *Parser) Peek() lexer.Token {
 // exits a node/scope
 func (p *Parser) Exit() {
 	if p.node.Parent() == nil {
-		logger.Exit("(Parsing) Compiler tried to escape root node of AST",
-			[]string{"Line", strconv.Itoa(p.Line)},
-			[]string{"Col", strconv.Itoa(p.Column)},
-			[]string{"Ast", "\n" + pp.Sprintln(p.node) + "\n"},
-			[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, "(Parsing) Compiler tried to escape root node of AST") + "\n"})
+		p.Panic("Compiler tried to escape root node of AST", "Navigation")
 	}
 
 	p.node = p.node.Parent()
@@ -117,12 +129,7 @@ func (p *Parser) Parse() {
 		case lexer.Eof:
 			reading = false
 		default:
-			logger.Exit("(Parsing) Unrecognized token",
-				[]string{"Line", strconv.Itoa(p.Line)},
-				[]string{"Col", strconv.Itoa(p.Column)},
-				[]string{"Token", p.Current().Raw},
-				[]string{"Ast", "\n" + pp.Sprintln(p.node) + "\n"},
-				[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, "(Parsing) Unrecognized token") + "\n"})
+			p.Panic("Unrecognized token", "Reading")
 		}
 
 		if !reading {
@@ -158,7 +165,7 @@ func (p *Parser) ParseWord() {
 		p.Advance()
 	case "import":
 		var imp *Import = p.ParseImport()
-		p.Enter(imp)
+		p.Append(imp)
 		p.Advance()
 	case "for":
 		p.Advance()

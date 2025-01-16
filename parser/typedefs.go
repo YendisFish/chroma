@@ -8,6 +8,7 @@ func (p *Parser) ParseTypeDef() *TypeDef {
 	p.Advance()
 
 	var tp TypeType
+	var pnt *string = nil
 	switch p.Current().Raw {
 	case "struct":
 		tp = TStruct
@@ -15,9 +16,12 @@ func (p *Parser) ParseTypeDef() *TypeDef {
 		tp = TInterface
 	default:
 		tp = TInherit
+
+		pnt = new(string)
+		*pnt = p.Current().Raw
 	}
 
 	p.Advance()
 
-	return &TypeDef{nil, []Node{}, p.Line, p.Column, p.Filename, nm, tp}
+	return &TypeDef{nil, []Node{}, p.Line, p.Column, p.Filename, nm, tp, pnt}
 }

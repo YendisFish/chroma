@@ -62,6 +62,7 @@ type Package struct {
 	col      int
 	filename string
 	Name     string
+	Type     PkgType
 }
 
 func (a *Package) Children() []Node       { return a.children }
@@ -71,6 +72,13 @@ func (a *Package) CreateParent(node Node) { a.parent = node }
 func (a *Package) Line() int              { return a.line }
 func (a *Package) Filename() string       { return a.filename }
 func (a *Package) Col() int               { return a.col }
+
+type PkgType int
+
+const (
+	PkgNormal PkgType = iota
+	PkgAllocator
+)
 
 type Import struct {
 	parent   Node

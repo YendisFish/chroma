@@ -2,10 +2,6 @@ package parser
 
 import (
 	"chroma/lexer"
-	"chroma/logger"
-	"strconv"
-
-	"github.com/k0kubun/pp"
 )
 
 func (p *Parser) ParseFunction() *Function {
@@ -27,7 +23,28 @@ func (p *Parser) ParseFunction() *Function {
 		p.Advance()
 	}
 
-	name := p.Current().Raw
+	var name string
+	special := false
+	switch tp := p.Current(); tp.Type {
+	case lexer.LBrack:
+		//handle indexer
+		special = true
+		name = "__internal_index_"
+		p.Advance()
+	case lexer.Word:
+		if tp.Raw == "delete" {
+			//handle free function
+			break
+		}
+
+		if tp.Raw == "alloc" {
+			//handle alloc function
+			break
+		}
+
+		name = p.Current().Raw
+	}
+
 	p.Advance()
 	var vars []Variable
 	vars = p.ParseFunctionArgs()
@@ -39,8 +56,16 @@ func (p *Parser) ParseFunction() *Function {
 	var tp TypeInfo
 	if p.Current().Type != lexer.LBrace {
 		tp = p.ReadType()
+
+		if special {
+			name = name + "get"
+		}
 	} else {
-		tp = TypeInfo{}
+		tp = TypeInfo{nil, nil, nil}
+
+		if special {
+			name = name + "set"
+		}
 	}
 
 	return &Function{nil, []Node{}, p.Line, p.Column, p.Filename, name, tp, vars, ifunc}
@@ -65,12 +90,7 @@ func (p *Parser) ParseFunctionArgs() []Variable {
 			reading = false
 			p.Advance()
 		default:
-			logger.Exit("(Parsing) Failed to parse function arguments (Unrecognized Symbol)",
-				[]string{"Line", strconv.Itoa(p.Line)},
-				[]string{"Col", strconv.Itoa(p.Column)},
-				[]string{"Symbol", p.Current().Raw},
-				[]string{"Ast", "\n" + pp.Sprintln(ret) + "\n"},
-				[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, "(Parsing) Failed to parse function arguments (Unrecognized Symbol)") + "\n"})
+			p.Panic("Unrecognized symbol", "Function arguments")
 		}
 
 		if !reading {

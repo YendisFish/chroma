@@ -22,11 +22,7 @@ func (p *Parser) ReadType() TypeInfo {
 					p.Advance()
 					index, err := strconv.ParseInt(p.Current().Raw, 0, 32)
 					if err != nil {
-						logger.Exit("(Parsing) Could not convert symbol to integer",
-							[]string{"Line", strconv.Itoa(p.Line)},
-							[]string{"Col", strconv.Itoa(p.Column)},
-							[]string{"Ast", "\n" + pp.Sprintln(p.node) + "\n"},
-							[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, "(Parsing) Could not convert symbol to integer") + "\n"})
+						p.Panic("Could not convert symbol into integer", "Variable Types")
 					}
 
 					ptrs = append(ptrs, Ptr{Array, &index})
@@ -47,7 +43,8 @@ func (p *Parser) ReadType() TypeInfo {
 					[]string{"Col", strconv.Itoa(p.Column)},
 					[]string{"Symbol", p.Current().Raw},
 					[]string{"Ast", "\n" + pp.Sprintln(ptrs) + "\n"},
-					[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, "(Parsing) Failed to parse variable type (Unrecognized Symbol)") + "\n"})
+					[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, p.Column, "(Parsing) Failed to parse variable type (Unrecognized Symbol)") + "\n"})
+				p.Panic("Unrecognized symbol", "Variable Types")
 			}
 
 			if !reading {

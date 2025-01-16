@@ -2,11 +2,8 @@ package parser
 
 import (
 	"chroma/lexer"
-	"chroma/logger"
 	"strconv"
 	"strings"
-
-	"github.com/k0kubun/pp"
 )
 
 // parses an expression
@@ -68,12 +65,7 @@ func (p *Parser) ParseExpression(expr *Expression) {
 			//this function will skip the correct amount of paranthesis IE ((()))
 			//and I have not told it to do so... idk where in the function it does it but it does
 		default:
-			logger.Exit("(Parsing)(EXPR) Unrecognized token",
-				[]string{"Line", strconv.Itoa(p.Line)},
-				[]string{"Col", strconv.Itoa(p.Column)},
-				[]string{"Token", p.Current().Raw},
-				[]string{"Ast", "\n" + pp.Sprintln(p.node) + "\n"},
-				[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, "(Parsing)(EXPR) Unrecognized token") + "\n"})
+			p.Panic("Unrecognized token", "Expression")
 		}
 
 		if !reading {
