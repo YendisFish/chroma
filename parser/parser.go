@@ -43,11 +43,13 @@ func (p *Parser) Panic(message string, location string) {
 		logger.Exit(msg,
 			[]string{"Line", strconv.Itoa(p.Line)},
 			[]string{"Col", strconv.Itoa(p.Column)},
+			[]string{"Token", p.Current().Raw},
 			[]string{"Ast", "\n" + pp.Sprintln(p.node) + "\n"},
 			[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, p.Column, msg) + "\n"})
 	}
 
 	logger.Exit(msg,
+		[]string{"Token", p.Current().Raw},
 		[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, p.Column, msg) + "\n"})
 }
 
@@ -181,7 +183,7 @@ func (p *Parser) ParseWord() {
 	case "type":
 		//parse type
 		var tpdef *TypeDef = p.ParseTypeDef()
-		p.Enter(tpdef)
+		p.Append(tpdef)
 		p.Advance()
 	default:
 		var expr Expression
@@ -191,6 +193,6 @@ func (p *Parser) ParseWord() {
 			p.Append(expr)
 		}
 
-		p.Advance()
+		//p.Advance()
 	}
 }

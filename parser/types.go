@@ -2,10 +2,7 @@ package parser
 
 import (
 	"chroma/lexer"
-	"chroma/logger"
 	"strconv"
-
-	"github.com/k0kubun/pp"
 )
 
 func (p *Parser) ReadType() TypeInfo {
@@ -38,12 +35,6 @@ func (p *Parser) ReadType() TypeInfo {
 			case lexer.Word:
 				reading = false
 			default:
-				logger.Exit("(Parsing) Failed to parse variable type (Unrecognized Symbol)",
-					[]string{"Line", strconv.Itoa(p.Line)},
-					[]string{"Col", strconv.Itoa(p.Column)},
-					[]string{"Symbol", p.Current().Raw},
-					[]string{"Ast", "\n" + pp.Sprintln(ptrs) + "\n"},
-					[]string{"File", p.Filename + logger.SLogLine(p.Filename, p.Line, p.Column, "(Parsing) Failed to parse variable type (Unrecognized Symbol)") + "\n"})
 				p.Panic("Unrecognized symbol", "Variable Types")
 			}
 

@@ -22,6 +22,19 @@ func (p *Parser) ParseExpression(expr *Expression) {
 
 			switch tok.Raw {
 			//ideally there will be cases for from, error, and other stuff as well
+			case "from":
+				p.Advance()
+				var ex Expression
+				p.ParseExpression(&ex)
+				// parse the from expression
+
+				var indexes []Expression = nil
+				if p.Current().Type == lexer.LBrack {
+					p.Advance()
+					indexes = p.ParseIndexAccess()
+				}
+
+				*expr = &From{nil, []Node{}, p.Line, p.Column, p.Filename, ex, indexes}
 			default:
 				if val, ok := determineLiteralType(p.Current()); ok {
 					*expr = &Literal{nil, nil, p.Line, p.Column, p.Filename, p.Current().Raw, val}
@@ -36,12 +49,14 @@ func (p *Parser) ParseExpression(expr *Expression) {
 				}
 			}
 
-			if p.Current().Line != tok.Line {
+			// if p.Current().Line != tok.Line {
+			// 	reading = false
+			// }
+			//p.Advance()
+			if p.ExpressionEnd() {
 				reading = false
 			}
-
-			//p.Advance()
-		case lexer.Add, lexer.Subtract, lexer.Star, lexer.BSlash:
+		case lexer.Add, lexer.Subtract, lexer.Star, lexer.FSlash:
 			//check for boolop
 			//parse binop
 
@@ -52,12 +67,21 @@ func (p *Parser) ParseExpression(expr *Expression) {
 			p.ParseExpression(&right)
 			binop.Right = right
 
-			p.Advance()
+			//p.Advance()
+
+			if p.ExpressionEnd() {
+				reading = false
+			}
 
 			*expr = binop
 		case lexer.LParen:
 			p.Advance()
-		case lexer.LBrace, lexer.RParen:
+		case lexer.RParen:
+			p.Advance()
+		case lexer.LBrack:
+			//create index access expression eventually
+			reading = false
+		case lexer.LBrace, lexer.RBrack:
 			//p.Advance()
 			reading = false // for some reason this does what I want it to do... but I actually have no clue why!!
 
@@ -120,4 +144,35 @@ func (p *Parser) ParseShortVar() *Variable {
 	p.ParseExpression(&expr)
 
 	return &Variable{p.node, []Node{}, nm, TypeInfo{nil, nil, nil}, p.Line, p.Column, p.Filename, expr}
+}
+
+func (p *Parser) ParseIndexAccess() []Expression {
+	var ret []Expression = []Expression{}
+	for r := true; r; {
+		switch p.Current().Type {
+		case lexer.RBrack:
+			p.Advance()
+			r = false
+		default:
+			var expr Expression
+			p.ParseExpression(&expr)
+
+			ret = append(ret, expr)
+		}
+
+		if !r {
+			break
+		}
+	}
+
+	return ret
+}
+
+func (p *Parser) ExpressionEnd() bool {
+	switch p.Current().Type {
+	case lexer.Add, lexer.Subtract, lexer.Star, lexer.FSlash, lexer.RParen, lexer.RBrack:
+		return false
+	default:
+		return true
+	}
 }

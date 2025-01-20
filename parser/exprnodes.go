@@ -87,3 +87,21 @@ func (a *FuncRef) CreateParent(node Node) { a.parent = node }
 func (a *FuncRef) Line() int              { return a.line }
 func (a *FuncRef) Filename() string       { return a.filename }
 func (a *FuncRef) Col() int               { return a.col }
+
+type From struct {
+	parent   Node
+	children []Node
+	line     int
+	col      int
+	filename string
+	Var      Expression
+	IndexRef []Expression
+}
+
+func (a *From) Children() []Node       { return a.children }
+func (a *From) Parent() Node           { return a.parent }
+func (a *From) Append(node Node)       { a.children = append(a.children, node) }
+func (a *From) CreateParent(node Node) { a.parent = node }
+func (a *From) Line() int              { return a.line }
+func (a *From) Filename() string       { return a.filename }
+func (a *From) Col() int               { return a.col }

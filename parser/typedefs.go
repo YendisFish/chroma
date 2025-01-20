@@ -1,5 +1,9 @@
 package parser
 
+import (
+	"chroma/lexer"
+)
+
 func (p *Parser) ParseTypeDef() *TypeDef {
 	p.Advance()
 
@@ -23,5 +27,30 @@ func (p *Parser) ParseTypeDef() *TypeDef {
 
 	p.Advance()
 
-	return &TypeDef{nil, []Node{}, p.Line, p.Column, p.Filename, nm, tp, pnt}
+	var ret *TypeDef = &TypeDef{nil, []Node{}, p.Line, p.Column, p.Filename, nm, tp, pnt}
+
+	if p.Current().Type == lexer.LBrace {
+		p.Advance()
+
+		for rding := true; rding; {
+			switch p.Current().Type {
+			case lexer.Word:
+				nm := p.Current().Raw
+				p.Advance()
+				tp := p.ReadType()
+
+				ret.children = append(ret.children, &Variable{ret, nil, nm, tp, p.Line, p.Column, p.Filename, nil})
+			case lexer.RBrace:
+				rding = false
+			default:
+				p.Panic("Unrecognized symbol", "Struct Parsing")
+			}
+
+			if !rding {
+				break
+			}
+		}
+	}
+
+	return ret
 }
